@@ -1,3 +1,5 @@
+known_breached = ["password", "password123", "123456", "qwerty", "letmein", "welcome", "monkey", "dragon", "master", "sunshine"]
+
 def check_length(password):
     #checks password, returns length_ok and length_verdict)
     password_length = len(password)
@@ -36,23 +38,29 @@ def check_rotation(rotation_interval):
         rotation_verdict = "EXCELLENT — frequent rotation policy detected"
     return rotation_ok, rotation_verdict
 
-def audit_password(account, username, password, rotation_interval):
+def audit_password(account, username, password, rotation_interval, known_breached):
     length_ok, length_verdict = check_length(password)
     has_digit = check_digit(password)
     not_username = check_username(password, username)
     rotation_ok, rotation_verdict = check_rotation(rotation_interval)
+    not_breached = check_breach(password, known_breached)
 
-    overall_pass = length_ok and has_digit and not_username and rotation_ok
+    overall_pass = length_ok and has_digit and not_username and not_breached
 
-    print('ACCOUNT:  ' + account)
-    print('LENGTH:   ' + length_verdict)
-    print('DIGIT:    ' + str(has_digit))
-    print('USERNAME: ' + str(not not_username))
-    print('ROTATION: ' + rotation_verdict)
+    print('Account:  ' + account)
+    print('Length veridct:   ' + length_verdict)
+    print('Digit found:    ' + str(has_digit))
+    print('Username match: ' + str(not not_username))
+    print('Rotation verdict: ' + rotation_verdict)
     if overall_pass:
         print('OVERALL:  PASS')
     else:
         print('OVERALL:  FAIL')
+
+    if not_breached == False:
+        print('Breach check: CRITICAL -- password found in known breach list')
+    else:
+        print('Breach check: NOT CRITICAL -- password not found in known breach list')
 
     passed = 0
     failed = 0
@@ -62,34 +70,56 @@ def audit_password(account, username, password, rotation_interval):
         failed = 1
 
     critical = 0
-    if not_username == False:
+    if not_username == False or not_breached == False:
         critical = 1
 
     return passed, failed, critical
 
+def check_breach(password, known_breached):
+    not_breached = password not in known_breached
+    return not_breached
+    
 if __name__ == '__main__':
     # Uses statement above to ensure program does not automatically run when imported.
     # Batch processing
-    batch_size = 3
     count = 0
     total_pass = 0
     total_fail = 0
     critical_count = 0
-    while count < batch_size:
-        # Gather input for this password analysis
-        count = count + 1
-        account = input("Enter the account name: ")
-        username = input("Enter the username: ")
-        password = input("Enter the password to analyze: ")
-        rotation_interval = int(input("Enter the rotation interval (months): "))
-        passed, failed, critical = audit_password(account, username, password, rotation_interval)
+
+    credentials = [
+    ["Gmail", "jsmith", "password123", 12],
+    ["SSH Server", "jsmith", "jsmith", 24],
+    ["VPN", "jsmith", "Tr0ub4dor&3correct", 3],
+    ["Company Email", "jsmith", "summer2024!", 6],
+    ["GitHub", "jsmith", "Blue-Harbor-72-Lantern", 6],
+    ]
+
+    failed_accounts = []
+    critical_accounts = []
+
+    for record in credentials:
+        account = record[0]
+        username = record[1]
+        password = record[2]
+        rotation_interval = record[3]
+
+        passed, failed, critical = audit_password(account, username, password, rotation_interval, known_breached)
         total_pass = total_pass + passed
         total_fail = total_fail + failed
         critical_count = critical_count + critical
+        if failed:
+             failed_accounts.append(account)
+        if critical:
+             critical_accounts.append(account)
 
     print('=== BATCH SUMMARY ===')
-    print('Total audited: ' + str(batch_size))
+    print('Total audited: ' + str(len(credentials)))
     print('Passed:        ' + str(total_pass))
     print('Failed:        ' + str(total_fail))
     print('Critical:      ' + str(critical_count))
-    print('NOTE: Input is still hardcoded -- file reading coming in Week 08.')
+    print('-----------------------')
+    print('Failed accounts: ' + str(failed_accounts))
+    print('Critical accounts: ' + str(critical_accounts))
+    print('-----------------------')
+    print('NOTE: Breach list and credentials are hardcoded -- file reading coming in Week 08.')
