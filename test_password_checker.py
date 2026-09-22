@@ -1,4 +1,4 @@
-from password_checker import check_length, check_digit, check_username, check_rotation
+from password_checker import check_length, check_digit, check_username, check_rotation, check_breach, known_breached
 
 # check_length tests
 length_ok, verdict = check_length('Pwd1')
@@ -28,5 +28,11 @@ print('PASS: check_rotation correctly returned False for 18-month interval')
 rotation_ok, verdict = check_rotation(6)
 assert rotation_ok == True
 print('PASS: check_rotation correctly returned True for 6-month interval')
+
+# check_breach tests (NEW)
+assert check_breach("password123", known_breached) == False
+print('PASS: check_breach correctly returned False when password is in known_breached')
+assert check_breach("Tr0ub4dor&3correct", known_breached) == True
+print('PASS: check_breach correctly returned True when password is not in known_breached')
 
 print('All tests passed.')
