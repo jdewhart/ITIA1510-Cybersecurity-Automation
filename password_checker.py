@@ -1,7 +1,7 @@
 known_breached = ["password", "password123", "123456", "qwerty", "letmein", "welcome", "monkey", "dragon", "master", "sunshine"]
 policy = {
     "min_length": 8,
-    "strong_length": 20,
+    "strong_length": 15,
     "max_rotation_months": 12,
     "good_rotation_months": 6,
     "require_digit": True,
