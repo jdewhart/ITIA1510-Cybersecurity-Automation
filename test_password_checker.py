@@ -1,4 +1,5 @@
-from password_checker import check_length, check_digit, check_username, check_rotation, check_breach, known_breached, policy
+from password_checker import(check_length, check_digit, check_username, check_rotation, check_breach, policy, load_credentials, load_breached, write_report)
+known_breached = load_breached("breached.txt")
 
 # check_length tests
 length_ok, verdict = check_length('Pwd1', policy)
@@ -41,3 +42,26 @@ print('PASS: policy correctly returned True when strong length == 15')
 assert "require_digit" in policy
 print('PASS: policy correctly returned True when require_digit is in policy')
 print('All tests passed.')
+
+# load_credentials tests
+credentials = load_credentials("credentials.txt")
+assert isinstance(credentials, list)
+print('PASS: credentials returns a list')
+assert "account" in credentials[0]
+print('PASS: the first record has an account key')
+
+# load_breached
+assert isinstance(known_breached, list)
+print('PASS: known_breached returns a list')
+assert "password123" in known_breached
+print('PASS: password 123 is in known_breached')
+
+# write_report tests
+test_strings = ["This is a test", "Test 2"]
+write_report(test_strings, "test_report.txt")
+
+with open("test_report.txt", "r") as f:
+    content = f.read()
+
+assert content == "This is a test\nTest 2\n"
+print('PASS: text matches')
