@@ -1,3 +1,8 @@
+import json
+#Policy is defined outside of the main block so it is available to all functions and able to be tested.
+#Reading a number from policy makes it easier to change data if needed. 
+#For example if a hardcoded number needed to be changed you would have to edit it in all areas that number is used, policy fixes that.
+
 policy = {
     "min_length": 8,
     "strong_length": 15,
@@ -26,7 +31,8 @@ def check_digit(password):
     for char in password:
         if char in '0123456789':
             has_digit = True
-    return has_digit
+            return "Yes"
+    return "No"
 
 def check_username(password, username):
     # Returns True when the password and username are different.
@@ -126,6 +132,14 @@ def write_report(report_lines, filepath):
         for line in report_lines:
             f.write(line + "\n")
 
+def save_summary(summary, filepath):
+    with open(filepath, "w") as f:
+        json.dump(summary, f, indent=2)
+
+def load_summary(filepath):
+    with open(filepath, "r") as f:
+        return json.load(f)
+
 
 if __name__ == '__main__':
     # Uses statement above to ensure program does not automatically run when imported.
@@ -165,4 +179,5 @@ if __name__ == '__main__':
     for line in report_lines:
         print(line)
     write_report(report_lines, "report.txt")
-   
+    save_summary(summary, "audit_summary.json")
+

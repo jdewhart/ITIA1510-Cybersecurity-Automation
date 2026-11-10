@@ -1,4 +1,4 @@
-from password_checker import(check_length, check_digit, check_username, check_rotation, check_breach, policy, load_credentials, load_breached, write_report)
+from password_checker import(check_length, check_digit, check_username, check_rotation, check_breach, policy, load_credentials, load_breached, write_report, save_summary, load_summary)
 known_breached = load_breached("breached.txt")
 
 # check_length tests
@@ -65,3 +65,23 @@ with open("test_report.txt", "r") as f:
 
 assert content == "This is a test\nTest 2\n"
 print('PASS: text matches')
+
+# save_summary and load summary tests
+sample = {"total": 2, "passed": 1, "failed": 1, "critical": 1,
+          "failed_accounts": ["Gmail"], "critical_accounts": ["Gmail"]}
+
+save_summary(sample, "test_summary.json")
+assert load_summary("test_summary.json") == sample
+print("PASS: save_summary and load_summary gave back the same dictionary")
+
+loadsum = load_summary("test_summary.json")
+assert isinstance(loadsum["failed_accounts"], list)
+print("PASS: failed_accounts is a list, not a string")
+
+saved_file = ""
+with open("audit_summary.json", "r") as f:
+    saved_file = f.read()
+
+for i in credentials:
+    assert i['password'] not in saved_file
+print("PASS: password is not in saved_file")
